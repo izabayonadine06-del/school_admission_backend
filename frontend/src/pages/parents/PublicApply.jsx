@@ -11,12 +11,13 @@ export default function PublicApply() {
   const [showCapacity, setShowCapacity] = useState(false);
   const [capacityLoading, setCapacityLoading] = useState(false);
   const [capacities, setCapacities] = useState([]);
+  const [capacitiesLoaded, setCapacitiesLoaded] = useState(false);
   const [capacityError, setCapacityError] = useState('');
+  const [requestedClass, setRequestedClass] = useState('');
+  const [level, setLevel] = useState('');
 
-  async function toggleAvailablePlaces() {
-    if (showCapacity) { setShowCapacity(false); return; }
-    setShowCapacity(true);
-    if (capacities.length || capacityLoading) return;
+  async function loadCapacities() {
+    if (capacitiesLoaded || capacityLoading) return;
     setCapacityLoading(true);
     setCapacityError('');
     try {
@@ -25,15 +26,26 @@ export default function PublicApply() {
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || 'Could not load available places.');
       setCapacities(result.capacities || []);
+      setCapacitiesLoaded(true);
     } catch (error) { setCapacityError(error.message); }
     finally { setCapacityLoading(false); }
+  }
+
+  function toggleAvailablePlaces() {
+    if (showCapacity) { setShowCapacity(false); return; }
+    setShowCapacity(true);
+    loadCapacities();
   }
   function continueToStudent(event) {
     event.preventDefault();
     const values = Object.fromEntries(new FormData(event.currentTarget));
     setParent(values);
     setStep(2);
+    loadCapacities();
   }
+
+  const availableTrades = [...new Set(capacities.filter((item) => Number(item.remaining) > 0).map((item) => item.requestedClass))];
+  const availableLevels = capacities.filter((item) => item.requestedClass === requestedClass && Number(item.remaining) > 0);
 
   async function submitApplication(event) {
     event.preventDefault();
@@ -74,13 +86,14 @@ export default function PublicApply() {
       <label>Previous school<input name="previousSchool" maxLength="200"/></label>
       <button type="button" className="parent-capacity-toggle public-capacity-toggle" onClick={toggleAvailablePlaces}>{showCapacity ? 'Close available places' : 'View available places'}</button>
       {showCapacity && <section className="parent-capacity-board"><header><div><small>LIVE ADMISSION PLACES</small><h3>Places available for {new Date().getFullYear()}</h3></div></header>{capacityLoading ? <p className="parent-capacity-empty">Loading available places...</p> : capacityError ? <p className="parent-capacity-empty">{capacityError}</p> : capacities.length ? <div className="parent-capacity-table-wrap"><table className="parent-capacity-table"><thead><tr><th>Trade</th><th>Level</th><th>Total places</th><th>Enrolled</th><th>Remaining</th></tr></thead><tbody>{capacities.map((item) => <tr key={item.id}><td>{item.requestedClass}</td><td>{item.level}</td><td>{item.capacity}</td><td>{item.enrolled}</td><td><strong className={Number(item.remaining) > 0 ? 'places-open' : 'places-full'}>{Number(item.remaining) > 0 ? item.remaining : 'Full'}</strong></td></tr>)}</tbody></table></div> : <p className="parent-capacity-empty">The school has not set available places for this year yet.</p>}</section>}
-      <label>Trade / program<select name="requestedClass" required defaultValue=""><option value="" disabled>Select a trade</option>{trades.map((trade) => <option key={trade}>{trade}</option>)}</select></label>
-      <label>Level<select name="level" required defaultValue=""><option value="" disabled>Select a level</option>{['L3', 'L4', 'L5'].map((level) => <option key={level}>{level}</option>)}</select></label>
+      <label>Trade / program<select name="requestedClass" value={requestedClass} onChange={(event) => { setRequestedClass(event.target.value); setLevel(""); }} required disabled={capacityLoading || !availableTrades.length}><option value="" disabled>{capacityLoading ? "Loading available trades..." : "Select a trade with places"}</option>{availableTrades.map((trade) => <option key={trade}>{trade}</option>)}</select></label>
+      <label>Level<select name="level" value={level} onChange={(event) => setLevel(event.target.value)} required disabled={!requestedClass || !availableLevels.length}><option value="" disabled>Select an available level</option>{availableLevels.map((item) => <option key={item.level} value={item.level}>{item.level} - {item.remaining} places remaining</option>)}</select></label>
+            {capacityError && <p className="account-error" role="alert">{capacityError}</p>}{!capacityLoading && !capacityError && !availableTrades.length && <p className="parent-capacity-empty">No places are currently available for applications this year. Please contact the school.</p>}
       <label>Previous school result<input name="previousResult" type="file" accept=".pdf,.jpg,.jpeg,.png"/></label>
       <label>Transfer document<input name="transferDocument" type="file" accept=".pdf,.jpg,.jpeg,.png"/></label>
       <label>Student photo<input name="studentPhoto" type="file" accept="image/jpeg,image/png"/></label>
       <label>National exam result<input name="nationalResult" type="file" accept=".pdf,.jpg,.jpeg,.png"/></label>
-      <button type="submit" disabled={busy}>{busy ? 'Submittingâ€¦' : 'Submit application'}</button>
+      <button type="submit" disabled={busy || capacityLoading || !availableLevels.some((item) => item.level === level)}>{busy ? 'Submittingâ€¦' : 'Submit application'}</button>
     </form>}
   </section></main>;
 }

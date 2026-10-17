@@ -52,6 +52,27 @@ router.post('/', upload.fields(Object.keys(types).map((name) => ({ name, maxCoun
   const moved = [];
   try {
     await client.query('BEGIN');
+    const admissionYear = new Date().getFullYear();
+    const capacity = await client.query(
+      `SELECT id, capacity FROM trade_capacities
+       WHERE admission_year = $1 AND requested_class = $2 AND level = $3 FOR UPDATE`,
+      [admissionYear, b.requestedClass.trim(), b.level]
+    );
+    if (!capacity.rows.length) {
+      await client.query('ROLLBACK');
+      await Promise.all(Object.values(req.files || {}).flat().map((file) => fs.rm(file.path, { force: true }).catch(() => {})));
+      return res.status(409).json({ error: 'Places for this trade and level have not been set by the school for this year.' });
+    }
+    const enrolled = await client.query(
+      `SELECT COUNT(DISTINCT student_id)::integer AS count FROM applications
+       WHERE admission_year = $1 AND requested_class = $2 AND level = $3 AND status = 'ACCEPTED'`,
+      [admissionYear, b.requestedClass.trim(), b.level]
+    );
+    if (Number(enrolled.rows[0].count) >= Number(capacity.rows[0].capacity)) {
+      await client.query('ROLLBACK');
+      await Promise.all(Object.values(req.files || {}).flat().map((file) => fs.rm(file.path, { force: true }).catch(() => {})));
+      return res.status(409).json({ error: 'There are no places remaining for this trade and level this year.' });
+    }
     const referenceNumber = `BTR-${randomBytes(4).toString('hex').toUpperCase()}`;
     const inserted = await client.query(
       `INSERT INTO public_admission_requests (reference_number,parent_name,parent_email,parent_phone,parent_address,student_name,date_of_birth,gender,student_address,previous_school,requested_class,level)
