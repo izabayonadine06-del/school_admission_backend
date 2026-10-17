@@ -1,0 +1,21 @@
+# Dependencies and build output
+**/node_modules/
+frontend/dist/
+backend/dist/
+coverage/
+
+# Local configuration, uploaded files, and runtime data
+**/.env
+**/.env.*
+!**/.env.example
+**/storage/
+**/uploads/
+
+# Logs and operating system files
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Temporary Office lock files
+~$*
