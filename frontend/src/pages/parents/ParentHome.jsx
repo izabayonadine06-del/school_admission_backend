@@ -3,6 +3,10 @@ import { API_BASE_URL, logout } from '../../auth.js';
 import AIAssistant from './AIAssistant.jsx';
 
 const tabs = ['Overview', 'My children', 'Applications', 'Announcements', 'Notifications', 'Messages', 'AI Assistant', 'Help'];
+const translations = {
+  en: { language:'Language', overview:'Overview', children:'My children', applications:'Applications', announcements:'Announcements', notifications:'Notifications', messages:'Messages', assistant:'AI Assistant', help:'Help', yourSpace:'YOUR SPACE', parentPortal:'PARENT PORTAL', parentAccount:'Parent account', logout:'Log out', parentSpace:'PARENT SPACE', heroKicker:'YOUR FAMILY, CONNECTED', greeting:'Good to see you,', heroText:'Keep up with your children\u2019s learning and school admissions in one place.', myChildren:'MY CHILDREN', viewChildren:'View children', trackApplications:'Track applications', unreadUpdates:'UNREAD UPDATES', seeNotifications:'See notifications', admissions:'ADMISSIONS', progress:'Application progress', viewAll:'View all', schoolNews:'FROM YOUR SCHOOL', latestUpdates:'Latest updates', allUpdates:'All updates', noApplications:'No applications yet', startApplication:'Start an application', addChild:'Add a child', noAnnouncements:'There are no school announcements yet.', loading:'Loading your school information\u2026', refresh:'Refresh', tagline:'Practical learning. Lasting skills.' },
+  rw: { language:'Ururimi', overview:'Incamake', children:'Abana banjye', applications:'Ubusabe', announcements:'Amatangazo', notifications:'Ubutumwa', messages:'Ibiganiro', assistant:'Umufasha wa AI', help:'Ubufasha', yourSpace:'AHO URI', parentPortal:'URUBUGA RW\u2019UMUBYEYI', parentAccount:'Konti y\u2019umubyeyi', logout:'Sohoka', parentSpace:'URUBUGA RW\u2019UMUBYEYI', heroKicker:'UMURYANGO WAWE, URI HAMWE', greeting:'Tunejejwe no kongera kukubona,', heroText:'Kurikirana imyigire y\u2019abana bawe n\u2019ubusabe bwo kwiga ahantu hamwe.', myChildren:'ABANA BANJYE', viewChildren:'Reba abana', trackApplications:'Kurikirana ubusabe', unreadUpdates:'UBUTUMWA BUTASOMWE', seeNotifications:'Reba ubutumwa', admissions:'KWINJIZA ABANYESHURI', progress:'Aho ubusabe bugeze', viewAll:'Reba byose', schoolNews:'AMAKURU AVA KU ISHURI', latestUpdates:'Amakuru mashya', allUpdates:'Amakuru yose', noApplications:'Nta busabe burahari', startApplication:'Tangira ubusabe', addChild:'Ongeramo umwana', noAnnouncements:'Nta matangazo y\u2019ishuri arahari.', loading:'Turimo gufungura amakuru y\u2019ishuri\u2026', refresh:'Kongera gufungura', tagline:'Kwiga ngiro. Ubumenyi burambye.' },
+};
 const trades = ['Software Development', 'Networking And Internet Technology', 'Computer Systems And Architecture', 'Accounting', 'Building Construction', 'Electronics And Telecommunication', 'Electrical Technology'];
 const levels = ['L3', 'L4', 'L5'];
 const tabIcons = { Overview: 'home', 'My children': 'students', Applications: 'applications', Announcements: 'announcements', Notifications: 'notifications', Messages: 'messages', 'AI Assistant': 'assistant', Help: 'help' };
@@ -60,6 +64,8 @@ export default function ParentHome({ user }) {
   const session = (() => { try { return JSON.parse(localStorage.getItem('btr.session') || 'null'); } catch { return null; } })();
   const token = session?.token;
   const [tab, setTab] = useState('Overview');
+  const [language, setLanguage] = useState(() => localStorage.getItem('btr.parent.language') === 'rw' ? 'rw' : 'en');
+  const t = translations[language];
   const [data, setData] = useState({ students: [], applications: [], announcements: [], notifications: [], conversations: [], capacities: [] });
   const [capacityYear, setCapacityYear] = useState(new Date().getFullYear());
   const [showCapacity, setShowCapacity] = useState(false);
@@ -244,21 +250,21 @@ export default function ParentHome({ user }) {
 
   return <div className="parent-dashboard">
     <aside className="parent-sidebar">
-      <a className="parent-brand" href="/" data-route><b>BTR</b><span>RWAMIKO<small>PARENT PORTAL</small></span></a>
-      <div className="sidebar-label">YOUR SPACE</div>
-      <nav className="parent-nav">{tabs.map((name) => <button key={name} className={`${tab === name ? 'active' : ''}${name === 'AI Assistant' ? ' ai-nav-item' : ''}`} onClick={() => go(name)}><span className="side-icon"><SidebarIcon name={tabIcons[name]} /></span>{name}{name === 'Messages' && <i>{data.conversations.reduce((n, c) => n + Number(c.unreadCount || 0), 0) || ''}</i>}{name === 'Notifications' && unread > 0 && <i>{unread}</i>}</button>)}</nav>
-      <div className="sidebar-profile"><span>{user.fullName?.[0]?.toUpperCase()}</span><div><b>{user.fullName}</b><small>Parent account</small></div><button onClick={signOut} title="Log out">?</button></div>
+      <a className="parent-brand" href="/" data-route><b>BTR</b><span>RWAMIKO<small>{t.parentPortal}</small></span></a>
+      <div className="sidebar-label">{t.yourSpace}</div>
+      <nav className="parent-nav">{tabs.map((name) => <button key={name} className={`${tab === name ? 'active' : ''}${name === 'AI Assistant' ? ' ai-nav-item' : ''}`} onClick={() => go(name)}><span className="side-icon"><SidebarIcon name={tabIcons[name]} /></span>{tabLabel(name, t)}{name === 'Messages' && <i>{data.conversations.reduce((n, c) => n + Number(c.unreadCount || 0), 0) || ''}</i>}{name === 'Notifications' && unread > 0 && <i>{unread}</i>}</button>)}</nav>
+      <div className="sidebar-profile"><span>{user.fullName?.[0]?.toUpperCase()}</span><div><b>{user.fullName}</b><small>{t.parentAccount}</small></div><button onClick={signOut} title={t.logout}>?</button></div>
     </aside>
     <main className="parent-content">
-      <header className="parent-header"><div><small>BTR RWAMIKO TSS · PARENT SPACE</small><h1>{tab}</h1></div><button className="header-bell" onClick={() => go('Overview')}>? <b>{unread || ''}</b></button></header>
+      <header className="parent-header"><div><small>BTR RWAMIKO TSS · PARENT SPACE</small><h1>{tabLabel(tab, t)}</h1></div><label className="parent-language-picker">{t.language}<select aria-label={t.language} value={language} onChange={(event) => { const value = event.target.value; setLanguage(value); localStorage.setItem('btr.parent.language', value); }}><option value="en">English</option><option value="rw">Kinyarwanda</option></select></label><button className="header-bell" onClick={() => go('Overview')}>? <b>{unread || ''}</b></button></header>
       {error && <div className="parent-flash error" role="alert">{error}<button onClick={() => setError('')}>×</button></div>}
       {notice && <div className="parent-flash success" role="status">{notice}<button onClick={() => setNotice('')}>×</button></div>}
-      {loading ? <div className="parent-loading">Loading your school information…</div> : <>
+      {loading ? <div className="parent-loading">{t.loading}</div> : <>
         {tab === 'Overview' && <>
-          <section className="parent-hero"><small>YOUR FAMILY, CONNECTED</small><h2>Good to see you,<br /><em>{user.fullName?.split(' ')[0]}.</em></h2><p>Keep up with your children’s learning and school admissions in one place.</p><span className="hero-orbit">01</span></section>
-          <section className="parent-metrics"><Metric title="MY CHILDREN" count={data.students.length} action="View children" icon="students" onClick={() => go('My children')} /><Metric title="APPLICATIONS" count={data.applications.length} action="Track applications" icon="applications" onClick={() => go('Applications')} /><Metric title="UNREAD UPDATES" count={unread} action="See notifications" icon="notifications" onClick={() => go('Notifications')} /></section>
-          <div className="parent-columns"><section className="parent-panel"><PanelHeading kicker="ADMISSIONS" title="Application progress" action="View all ?" onClick={() => go('Applications')} />{data.applications.length ? data.applications.slice(0, 4).map((item) => <Application key={item.id} item={item} />) : <Empty title="No applications yet" text={data.students.length ? "Start an admission application for one of your children." : "Add a child profile to start an admission application."} action={data.students.length ? "Start an application" : "Add a child"} onClick={() => { if (data.students.length) { go("Applications"); setForm("application"); } else { go("My children"); setForm("student"); } }} />}</section>
-          <section className="parent-panel"><PanelHeading kicker="FROM YOUR SCHOOL" title="Latest updates" action="All updates ?" onClick={() => go('Announcements')} />{data.announcements.length ? data.announcements.slice(0, 3).map((item) => <Announcement key={item.id} item={item} />) : <p className="parent-muted">There are no school announcements yet.</p>}</section></div>
+          <section className="parent-hero"><small>{t.heroKicker}</small><h2>{t.greeting}<br /><em>{user.fullName?.split(' ')[0]}.</em></h2><p>{t.heroText}</p><span className="hero-orbit">01</span></section>
+          <section className="parent-metrics"><Metric title={t.myChildren} count={data.students.length} action={t.viewChildren} icon="students" onClick={() => go('My children')} /><Metric title={t.applications.toUpperCase()} count={data.applications.length} action={t.trackApplications} icon="applications" onClick={() => go('Applications')} /><Metric title={t.unreadUpdates} count={unread} action={t.seeNotifications} icon="notifications" onClick={() => go('Notifications')} /></section>
+          <div className="parent-columns"><section className="parent-panel"><PanelHeading kicker={t.admissions} title={t.progress} action={t.viewAll} onClick={() => go('Applications')} />{data.applications.length ? data.applications.slice(0, 4).map((item) => <Application key={item.id} item={item} />) : <Empty title={t.noApplications} text={data.students.length ? t.startApplication : t.addChild} action={data.students.length ? t.startApplication : t.addChild} onClick={() => { if (data.students.length) { go("Applications"); setForm("application"); } else { go("My children"); setForm("student"); } }} />}</section>
+          <section className="parent-panel"><PanelHeading kicker={t.schoolNews} title={t.latestUpdates} action={t.allUpdates} onClick={() => go('Announcements')} />{data.announcements.length ? data.announcements.slice(0, 3).map((item) => <Announcement key={item.id} item={item} />) : <p className="parent-muted">{t.noAnnouncements}</p>}</section></div>
           <NotificationList items={data.notifications.slice(0, 5)} onRead={readNotification} />
         </>}
 
@@ -287,7 +293,7 @@ export default function ParentHome({ user }) {
           <div className="parent-messages"><div className="conversation-list">{data.conversations.map((item) => <button key={item.conversationId} className={conversationId === item.conversationId ? 'selected' : ''} onClick={() => openConversation(item.conversationId)}><b>{item.otherParticipant}</b><small>{dateLabel(item.lastMessageAt)}</small>{Number(item.unreadCount) > 0 && <i>{item.unreadCount}</i>}</button>)}{!data.conversations.length && <p className="parent-muted">No conversations yet. Send a new message to contact the school.</p>}</div><div className="conversation-view">{conversationId ? <><div className="message-thread">{messages.map((item) => <article key={item.id} className={String(item.senderId) === String(user.id) ? 'mine' : ''}><small>{item.senderName} · {dateLabel(item.sentAt)}</small><p>{item.content}</p></article>)}</div><form className="reply-form" onSubmit={reply}><textarea name="content" required maxLength="5000" rows="2" placeholder="Write a reply…" /><button disabled={busy}>Send</button></form></> : <div className="conversation-empty">Select a conversation to view messages.</div>}</div></div>
         </section>}
       </>}
-      <footer className="parent-footer"><span>© BTR Rwamiko TSS</span><span>Practical learning. Lasting skills.</span><button onClick={refresh}>Refresh ?</button></footer>
+      <footer className="parent-footer"><span>© BTR Rwamiko TSS</span><span>{t.tagline}</span><button onClick={refresh}>{t.refresh}</button></footer>
     </main>
     {documentPreview && <div className="document-preview-backdrop" role="presentation" onClick={closeDocumentPreview}><section className="document-preview" role="dialog" aria-modal="true" aria-label={documentPreview.name} onClick={(event) => event.stopPropagation()}><header><b>{documentPreview.name}</b><button type="button" onClick={closeDocumentPreview} aria-label="Close document preview">×</button></header>{documentPreview.mimeType?.startsWith('image/') ? <img src={documentPreview.url} alt={documentPreview.name} /> : <iframe src={documentPreview.url} title={documentPreview.name} />}</section></div>}
   </div>;
@@ -303,3 +309,5 @@ function FormActions({ busy, label, onCancel }) { return <div className="parent-
 
 
 
+
+function tabLabel(name, t) { return ({ Overview:t.overview, 'My children':t.children, Applications:t.applications, Announcements:t.announcements, Notifications:t.notifications, Messages:t.messages, 'AI Assistant':t.assistant, Help:t.help })[name] || name; }
