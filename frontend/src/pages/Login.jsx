@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { authRequest, goToRolePage, saveSession } from '../auth.js';
+import { accountText, LanguagePicker, useLanguage } from '../language.js';
 
 export default function Login() {
+  const [language, setLanguage] = useLanguage();
+  const t = accountText[language];
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -28,19 +31,20 @@ export default function Login() {
     <main className="account-page">
       <form className="account-card" onSubmit={handleSubmit}>
         <a className="account-back" href="/" data-route>? BTR Rwamiko TSS</a>
-        <div className="eyebrow"><span className="eyebrow-dot" /> WELCOME BACK</div>
-        <h1>Log in</h1>
-        <p>Sign in to continue to your school account.</p>
+        <LanguagePicker language={language} onChange={setLanguage} />
+        <div className="eyebrow"><span className="eyebrow-dot" /> {t.welcome}</div>
+        <h1>{t.login}</h1>
+        <p>{t.loginDescription}</p>
         <section className="account-section">
-          <h2>Account details</h2>
+          <h2>{t.accountDetails}</h2>
           <div className="account-fields">
-            <label>Email address<input name="email" type="email" autoComplete="email" required /></label>
-            <label>Password<input name="password" type="password" autoComplete="current-password" required /></label>
+            <label>{t.email}<input name="email" type="email" autoComplete="email" required /></label>
+            <label>{t.password}<input name="password" type="password" autoComplete="current-password" required /></label>
           </div>
         </section>
         {error && <p className="account-error" role="alert">{error}</p>}
-        <button className="button button-dark" type="submit" disabled={submitting}>{submitting ? 'Signing in…' : 'Log in'}</button>
-        <div className="account-switch">New to BTR? <a href="/register" data-route>Create an account</a></div>
+        <button className="button button-dark" type="submit" disabled={submitting}>{submitting ? t.signingIn : t.login}</button>
+        <div className="account-switch">{t.newToBtr} <a href="/register" data-route>{t.createAccount}</a></div>
       </form>
     </main>
   );

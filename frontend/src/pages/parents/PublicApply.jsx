@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
 import { API_BASE_URL } from '../../auth.js';
+import { LanguagePicker, useLanguage } from '../../language.js';
 
 const trades = ['Software Development', 'Networking And Internet Technology', 'Computer Systems And Architecture', 'Accounting', 'Building Construction', 'Electronics And Telecommunication', 'Electrical Technology'];
 
 export default function PublicApply() {
+  const [language, setLanguage] = useLanguage();
+  const rw = language === 'rw';
+  const t = rw ? {
+    home: 'Garuka ku rubuga rw’ishuri', parent: 'Amakuru y’umubyeyi', student: 'Ubusabe bw’umunyeshuri', intro: 'Saba kwiga udafunguye konti. Umuyobozi w’ishuri azasuzuma ubusabe bwawe akumenyeshe kuri imeyili.', name: 'Amazina y’umubyeyi cyangwa umurera', email: 'Imeyili', phone: 'Telefoni', address: 'Aderesi', next: 'Komeza ku makuru y’umunyeshuri', edit: 'Hindura', studentName: 'Amazina y’umunyeshuri', birth: 'Itariki y’amavuko', gender: 'Igitsina', studentAddress: 'Aderesi y’umunyeshuri', previous: 'Ishuri yigagaho', places: 'Reba imyanya ihari', close: 'Funga imyanya ihari', live: 'IMYANYA YO KWIGA IHARI', loading: 'Turimo kureba imyanya ihari…', trade: 'Umwuga / porogaramu', level: 'Umwaka', total: 'Imyanya yose', enrolled: 'Abamaze kwiyandikisha', remaining: 'Isigaye', full: 'Yuzuye', noPlacesSet: 'Ishuri ntirirashyiraho imyanya ihari muri uyu mwaka.', loadingTrades: 'Turimo kureba imyuga ihari…', selectTrade: 'Hitamo umwuga urimo imyanya', selectLevel: 'Hitamo umwaka urimo imyanya', noneAvailable: 'Nta myanya yo gusabiraho ihari muri uyu mwaka. Hamagara ishuri.', result: 'Ibisubizo byo mu ishuri ribanza', transfer: 'Ibaruwa yo kwimuka', photo: 'Ifoto y’umunyeshuri', national: 'Ibisubizo by’ikizamini cya leta', submit: 'Ohereza ubusabe', sending: 'Turimo kohereza…'
+  } : {
+    home: 'Back to school home', parent: 'Parent information', student: 'Student application', intro: 'Apply without creating an account. A headteacher will review your request and contact you by email.', name: 'Parent or guardian name', email: 'Email', phone: 'Phone', address: 'Address', next: 'Continue to student details', edit: 'Edit', studentName: 'Student full name', birth: 'Date of birth', gender: 'Gender', studentAddress: 'Student address', previous: 'Previous school', places: 'View available places', close: 'Close available places', live: 'LIVE ADMISSION PLACES', loading: 'Loading available places…', trade: 'Trade / program', level: 'Level', total: 'Total places', enrolled: 'Enrolled', remaining: 'Remaining', full: 'Full', noPlacesSet: 'The school has not set available places for this year yet.', loadingTrades: 'Loading available trades…', selectTrade: 'Select a trade with places', selectLevel: 'Select an available level', noneAvailable: 'No places are currently available for applications this year. Please contact the school.', result: 'Previous school result', transfer: 'Transfer document', photo: 'Student photo', national: 'National exam result', submit: 'Submit application', sending: 'Submitting…'
+  };
   const [step, setStep] = useState(1);
   const [parent, setParent] = useState({ fullName: '', email: '', phone: '', address: '' });
   const [busy, setBusy] = useState(false);
@@ -67,8 +75,9 @@ export default function PublicApply() {
   }
 
   return <main className="account-page public-apply-page"><section className="account-card public-apply-card">
-    <a href="/" data-route>â† Back to school home</a>
-    <p className="eyebrow">BTR RWAMIKO TSS Â· ADMISSIONS</p><h1>{step === 1 ? 'Parent information' : 'Student application'}</h1>
+    <LanguagePicker language={language} onChange={setLanguage} />
+    <a href="/" data-route>Ã¢â€ Â Back to school home</a>
+    <p className="eyebrow">BTR RWAMIKO TSS Ã‚Â· ADMISSIONS</p><h1>{step === 1 ? 'Parent information' : 'Student application'}</h1>
     <p>Apply without creating an account. A headteacher will review your request and contact you by email.</p>
     {message && <p role="status">{message}</p>}
     {step === 1 ? <form onSubmit={continueToStudent} className="public-apply-form">
@@ -76,9 +85,9 @@ export default function PublicApply() {
       <label>Email<input name="email" type="email" required maxLength="254" defaultValue={parent.email}/></label>
       <label>Phone<input name="phone" type="tel" maxLength="32" defaultValue={parent.phone}/></label>
       <label>Address<textarea name="address" maxLength="2000" defaultValue={parent.address}/></label>
-      <button type="submit">Continue to student details â†’</button>
+      <button type="submit">Continue to student details Ã¢â€ â€™</button>
     </form> : <form onSubmit={submitApplication} className="public-apply-form" encType="multipart/form-data">
-      <p>Parent: <b>{parent.fullName}</b> Â· {parent.email} <button type="button" onClick={() => setStep(1)}>Edit</button></p>
+      <p>Parent: <b>{parent.fullName}</b> Ã‚Â· {parent.email} <button type="button" onClick={() => setStep(1)}>Edit</button></p>
       <label>Student full name<input name="studentName" required minLength="2" maxLength="160"/></label>
       <label>Date of birth<input name="dateOfBirth" type="date" required/></label>
       <label>Gender<input name="gender" maxLength="30"/></label>
@@ -93,7 +102,7 @@ export default function PublicApply() {
       <label>Transfer document<input name="transferDocument" type="file" accept=".pdf,.jpg,.jpeg,.png"/></label>
       <label>Student photo<input name="studentPhoto" type="file" accept="image/jpeg,image/png"/></label>
       <label>National exam result<input name="nationalResult" type="file" accept=".pdf,.jpg,.jpeg,.png"/></label>
-      <button type="submit" disabled={busy || capacityLoading || !availableLevels.some((item) => item.level === level)}>{busy ? 'Submittingâ€¦' : 'Submit application'}</button>
+      <button type="submit" disabled={busy || capacityLoading || !availableLevels.some((item) => item.level === level)}>{busy ? 'SubmittingÃ¢â‚¬Â¦' : 'Submit application'}</button>
     </form>}
   </section></main>;
 }

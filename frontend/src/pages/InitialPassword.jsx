@@ -22,14 +22,14 @@ export default function InitialPassword() {
   }
 
   return <main className="account-page"><section className="account-card">
-    <a href="/" data-route>← School home</a><p className="eyebrow">PARENT ACCOUNT SETUP</p><h1>Create your password</h1>
+    <a href="/" data-route>â† School home</a><p className="eyebrow">PARENT ACCOUNT SETUP</p><h1>Create your password</h1>
     <p>Choose a password to access your parent account. Use at least 12 characters.</p>
     {!token && <p role="alert">This setup link is missing its security token. Please contact the school.</p>}
     {message && <p role="status">{message}</p>}
     <form onSubmit={submit} className="account-form">
       <label>Password<input name="password" type="password" minLength="12" maxLength="128" required autoComplete="new-password"/></label>
       <label>Confirm password<input name="confirmPassword" type="password" minLength="12" maxLength="128" required autoComplete="new-password"/></label>
-      <button disabled={busy || !token}>{busy ? 'Saving…' : 'Set password'}</button>
+      <button disabled={busy || !token}>{busy ? 'Savingâ€¦' : 'Set password'}</button>
     </form>
   </section></main>;
 }
