@@ -17,7 +17,7 @@ const app = express();
 app.use(cors);
 app.use(express.json({ limit: '1mb' }));
 app.use('/api/health', healthRoutes);
-app.use('/api/auth', authRoutes);
+app.use('/auth/login', authRoutes);
 app.use('/api/public-admissions', publicAdmissionsRoutes);
 app.use('/api/applications', applicationsRoutes);
 app.use('/api/capacities', capacitiesRoutes);
