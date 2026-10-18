@@ -66,7 +66,7 @@ export default function PublicApply() {
       const response = await fetch(`${API_BASE_URL}/public-admissions`, { method: 'POST', body: form });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || 'Could not submit the application.');
-      setMessage(`Your application was received successfully. Reference: ${result.referenceNumber}. The school will contact ${parent.email} after review.`);
+      setMessage(rw ? `Ubusabe bwawe bwakiriwe neza. Nimero yabwo ni ${result.referenceNumber}. Ishuri rizakumenyesha rimaze kubusuzuma.` : `Your application was received successfully. Reference: ${result.referenceNumber}. The school will contact ${parent.email} after review.`);
       submittedForm.reset();
       setParent({ fullName: '', email: '', phone: '', address: '' });
       setStep(1);
@@ -76,32 +76,32 @@ export default function PublicApply() {
 
   return <main className="account-page public-apply-page"><section className="account-card public-apply-card">
     <LanguagePicker language={language} onChange={setLanguage} />
-    <a href="/" data-route>Ã¢â€ Â Back to school home</a>
-    <p className="eyebrow">BTR RWAMIKO TSS Ã‚Â· ADMISSIONS</p><h1>{step === 1 ? 'Parent information' : 'Student application'}</h1>
-    <p>Apply without creating an account. A headteacher will review your request and contact you by email.</p>
+    <a href="/" data-route>Ã¢â€ Â {rw ? 'Garuka ku ishuri' : 'Back to school home'}</a>
+    <p className="eyebrow">BTR RWAMIKO TSS Ã‚Â· ADMISSIONS</p><h1>{step === 1 ? t.parent : t.student}</h1>
+    <p>{t.intro}</p>
     {message && <p role="status">{message}</p>}
     {step === 1 ? <form onSubmit={continueToStudent} className="public-apply-form">
-      <label>Parent or guardian name<input name="fullName" required minLength="2" maxLength="160" defaultValue={parent.fullName}/></label>
-      <label>Email<input name="email" type="email" required maxLength="254" defaultValue={parent.email}/></label>
-      <label>Phone<input name="phone" type="tel" maxLength="32" defaultValue={parent.phone}/></label>
-      <label>Address<textarea name="address" maxLength="2000" defaultValue={parent.address}/></label>
-      <button type="submit">Continue to student details Ã¢â€ â€™</button>
+      <label>{t.name}<input name="fullName" required minLength="2" maxLength="160" defaultValue={parent.fullName}/></label>
+      <label>{t.email}<input name="email" type="email" required maxLength="254" defaultValue={parent.email}/></label>
+      <label>{t.phone}<input name="phone" type="tel" maxLength="32" defaultValue={parent.phone}/></label>
+      <label>{t.address}<textarea name="address" maxLength="2000" defaultValue={parent.address}/></label>
+      <button type="submit">{t.next} Ã¢â€ â€™</button>
     </form> : <form onSubmit={submitApplication} className="public-apply-form" encType="multipart/form-data">
-      <p>Parent: <b>{parent.fullName}</b> Ã‚Â· {parent.email} <button type="button" onClick={() => setStep(1)}>Edit</button></p>
-      <label>Student full name<input name="studentName" required minLength="2" maxLength="160"/></label>
-      <label>Date of birth<input name="dateOfBirth" type="date" required/></label>
-      <label>Gender<input name="gender" maxLength="30"/></label>
-      <label>Student address<textarea name="studentAddress" maxLength="2000"/></label>
-      <label>Previous school<input name="previousSchool" maxLength="200"/></label>
-      <button type="button" className="parent-capacity-toggle public-capacity-toggle" onClick={toggleAvailablePlaces}>{showCapacity ? 'Close available places' : 'View available places'}</button>
-      {showCapacity && <section className="parent-capacity-board"><header><div><small>LIVE ADMISSION PLACES</small><h3>Places available for {new Date().getFullYear()}</h3></div></header>{capacityLoading ? <p className="parent-capacity-empty">Loading available places...</p> : capacityError ? <p className="parent-capacity-empty">{capacityError}</p> : capacities.length ? <div className="parent-capacity-table-wrap"><table className="parent-capacity-table"><thead><tr><th>Trade</th><th>Level</th><th>Total places</th><th>Enrolled</th><th>Remaining</th></tr></thead><tbody>{capacities.map((item) => <tr key={item.id}><td>{item.requestedClass}</td><td>{item.level}</td><td>{item.capacity}</td><td>{item.enrolled}</td><td><strong className={Number(item.remaining) > 0 ? 'places-open' : 'places-full'}>{Number(item.remaining) > 0 ? item.remaining : 'Full'}</strong></td></tr>)}</tbody></table></div> : <p className="parent-capacity-empty">The school has not set available places for this year yet.</p>}</section>}
+      <p>Parent: <b>{parent.fullName}</b> Ã‚Â· {parent.email} <button type="button" onClick={() => setStep(1)}>{t.edit}</button></p>
+      <label>{t.studentName}<input name="studentName" required minLength="2" maxLength="160"/></label>
+      <label>{t.birth}<input name="dateOfBirth" type="date" required/></label>
+      <label>{t.gender}<input name="gender" maxLength="30"/></label>
+      <label>{t.studentAddress}<textarea name="studentAddress" maxLength="2000"/></label>
+      <label>{t.previous}<input name="previousSchool" maxLength="200"/></label>
+      <button type="button" className="parent-capacity-toggle public-capacity-toggle" onClick={toggleAvailablePlaces}>{showCapacity ? t.close : t.places}</button>
+      {showCapacity && <section className="parent-capacity-board"><header><div><small>{t.live}</small><h3>Places available for {new Date().getFullYear()}</h3></div></header>{capacityLoading ? <p className="parent-capacity-empty">{t.loading}</p> : capacityError ? <p className="parent-capacity-empty">{capacityError}</p> : capacities.length ? <div className="parent-capacity-table-wrap"><table className="parent-capacity-table"><thead><tr><th>{t.trade}</th><th>{t.level}</th><th>{t.total}</th><th>{t.enrolled}</th><th>{t.remaining}</th></tr></thead><tbody>{capacities.map((item) => <tr key={item.id}><td>{item.requestedClass}</td><td>{item.level}</td><td>{item.capacity}</td><td>{item.enrolled}</td><td><strong className={Number(item.remaining) > 0 ? 'places-open' : 'places-full'}>{Number(item.remaining) > 0 ? item.remaining : t.full}</strong></td></tr>)}</tbody></table></div> : <p className="parent-capacity-empty">{t.noPlacesSet}</p>}</section>}
       <label>Trade / program<select name="requestedClass" value={requestedClass} onChange={(event) => { setRequestedClass(event.target.value); setLevel(""); }} required disabled={capacityLoading || !availableTrades.length}><option value="" disabled>{capacityLoading ? "Loading available trades..." : "Select a trade with places"}</option>{availableTrades.map((trade) => <option key={trade}>{trade}</option>)}</select></label>
-      <label>Level<select name="level" value={level} onChange={(event) => setLevel(event.target.value)} required disabled={!requestedClass || !availableLevels.length}><option value="" disabled>Select an available level</option>{availableLevels.map((item) => <option key={item.level} value={item.level}>{item.level} - {item.remaining} places remaining</option>)}</select></label>
-            {capacityError && <p className="account-error" role="alert">{capacityError}</p>}{!capacityLoading && !capacityError && !availableTrades.length && <p className="parent-capacity-empty">No places are currently available for applications this year. Please contact the school.</p>}
-      <label>Previous school result<input name="previousResult" type="file" accept=".pdf,.jpg,.jpeg,.png"/></label>
-      <label>Transfer document<input name="transferDocument" type="file" accept=".pdf,.jpg,.jpeg,.png"/></label>
-      <label>Student photo<input name="studentPhoto" type="file" accept="image/jpeg,image/png"/></label>
-      <label>National exam result<input name="nationalResult" type="file" accept=".pdf,.jpg,.jpeg,.png"/></label>
+      <label>Level<select name="level" value={level} onChange={(event) => setLevel(event.target.value)} required disabled={!requestedClass || !availableLevels.length}><option value="" disabled>{t.selectLevel}</option>{availableLevels.map((item) => <option key={item.level} value={item.level}>{item.level} - {item.remaining} places remaining</option>)}</select></label>
+            {capacityError && <p className="account-error" role="alert">{capacityError}</p>}{!capacityLoading && !capacityError && !availableTrades.length && <p className="parent-capacity-empty">{t.noneAvailable}</p>}
+      <label>{t.result}<input name="previousResult" type="file" accept=".pdf,.jpg,.jpeg,.png"/></label>
+      <label>{t.transfer}<input name="transferDocument" type="file" accept=".pdf,.jpg,.jpeg,.png"/></label>
+      <label>{t.photo}<input name="studentPhoto" type="file" accept="image/jpeg,image/png"/></label>
+      <label>{t.national}<input name="nationalResult" type="file" accept=".pdf,.jpg,.jpeg,.png"/></label>
       <button type="submit" disabled={busy || capacityLoading || !availableLevels.some((item) => item.level === level)}>{busy ? 'SubmittingÃ¢â‚¬Â¦' : 'Submit application'}</button>
     </form>}
   </section></main>;

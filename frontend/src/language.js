@@ -13,7 +13,13 @@ export function useLanguage() {
 
 export function LanguagePicker({ language, onChange }) {
   const rw = language === 'rw';
-  return <label className="account-language-picker">{rw ? 'Ururimi' : 'Language'}<select aria-label={rw ? 'Ururimi' : 'Language'} value={language} onChange={(event) => onChange(event.target.value)}><option value="en">English</option><option value="rw">Kinyarwanda</option></select></label>;
+  return React.createElement('label', { className: 'account-language-picker' },
+    rw ? 'Ururimi' : 'Language',
+    React.createElement('select', { 'aria-label': rw ? 'Ururimi' : 'Language', value: language, onChange: (event) => onChange(event.target.value) },
+      React.createElement('option', { value: 'en' }, 'English'),
+      React.createElement('option', { value: 'rw' }, 'Kinyarwanda'),
+    ),
+  );
 }
 
 export const accountText = {
